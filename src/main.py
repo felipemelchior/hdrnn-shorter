@@ -1,31 +1,13 @@
-from flask import Flask, request, redirect
-import base64
-
+from flask import Flask
+from routes.url_routes import register_routes
 from db import connect_redis
-from utils import encode_url
 
-app = Flask(__name__)
-redis_client = connect_redis()
+def create_app():
+    app = Flask(__name__)
+    app.redis_client = connect_redis()
+    register_routes(app)
+    return app
 
-@app.route("/register", methods=["POST"])
-def register():
-    data = request.json
-    clear_url = data["original_url"]
-    shorter_endpoint = encode_url(clear_url)
-    redis_client.set(shorter_endpoint, clear_url)
-    return {
-        "status": "success",
-        "url": shorter_endpoint
-    }
-
-@app.route("/<endpoint>", methods=["GET"])
-def redirect_user(endpoint):
-    original_endpoint = redis_client.get(endpoint)
-    print(original_endpoint)
-    if original_endpoint != None:
-        return redirect(original_endpoint)
-    return "<p>route not found</p>"
-
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True)

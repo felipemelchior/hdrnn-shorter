@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>URL Shortener</title>
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 1em;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>HDRNN: Shorten a URL</h1>
+  <form id="urlForm">
+    <input type="url" id="originalUrl" placeholder="Enter a URL" required />
+    <button type="submit">Get short url</button>
+  </form>
+
+  <div class="result" id="result" style="display: none;"></div>
+
+  <script>
+    const form = document.getElementById("urlForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      result.style.display = "none";
+
+      const originalUrl = document.getElementById("originalUrl").value;
+
+      const response = await fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ original_url: originalUrl })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const shortUrl = `${window.location.origin}/${data.url}`;
+        result.style.display = "block";
+        result.innerHTML = `Shortened URL: <a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+      } else {
+        result.style.display = "block";
+        result.innerHTML = `<strong>Error:</strong> ${data.error || 'Failed to shorten URL'}`;
+      }
+    });
+  </script>
+
+</body>
+</html>
